@@ -26,7 +26,7 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
 
 /** URL base de la API. Cambiar en producción. */
-const API_BASE = "https://pocketpal-6ydq.onrender.com/api";
+const API_BASE = "/api";
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
