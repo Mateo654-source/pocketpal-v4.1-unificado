@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>POCKETPAL — Dashboard</title>
+
+        <!-- Fuentes -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="shortcut icon"
+            href="assets/logoPocketPal.png"
+            type="image/x-icon" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet" />
+
+        <!-- Estilos: base → componentes → página -->
+        <link rel="stylesheet" href="css/base.css" />
+        <link rel="stylesheet" href="css/components.css" />
+        <link rel="stylesheet" href="css/dashboard.css" />
+
+        <!-- Chart.js — biblioteca de gráficas -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
+            defer></script>
+    </head>
+
+    <body>
+        <div class="app-shell">
+            <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+            <aside id="sidebar" class="sidebar flex-col bg-nova-bg2">
+                <!-- Logo -->
+                <div class="sidebar-logo">
+                    <div
+                        class="nova-grad"
+                        style="
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 8px;
+                            display: grid;
+                            place-items: center;
+                            flex-shrink: 0;
+                            overflow: hidden;
+                        ">
+                        <img
+                            src="assets/logoPocketPal.png"
+                            alt="logo"
+                            style="
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                            " />
+                    </div>
+                    <span
+                        style="
+                            font-size: 15px;
+                            font-weight: 700;
+                            letter-spacing: -0.01em;
+                            color: var(--text);
+                        "
+                        >POCKETPAL</span
+                    >
+                </div>
+
+                <!-- Nav scrolleable -->
+                <nav style="flex: 1; padding: 12px; overflow-y: auto">
+                    <p class="nav-section-label">Principal</p>
+                    <a href="" class="nav-item active">
+                        <span class="nav-item-icon">◈</span> Dashboard
+                    </a>
+                    <a href="./ai.html" class="nav-item">
+                        <span class="nav-item-icon">✦</span> Agente POCKETPAL
+                    </a>
+
+                    <p class="nav-section-label">Finanzas</p>
+                    <button class="nav-item" data-scroll="section-transactions">
+                        <span class="nav-item-icon">⇅</span> Transacciones
+                    </button>
+                    <button class="nav-item" data-scroll="section-goals">
+                        <span class="nav-item-icon">◎</span> Metas
+                    </button>
+                    <button class="nav-item" data-scroll="section-categories">
+                        <span class="nav-item-icon">◫</span> Categorías
+                    </button>
+                    <button class="nav-item" data-scroll="section-charts">
+                        <span class="nav-item-icon">◑</span> Gráficas
+                    </button>
+
+                    <p class="nav-section-label">Acciones</p>
+                    <button class="nav-item" id="nav-new-tx">
+                        <span class="nav-item-icon">＋</span> Nueva transacción
+                    </button>
+                    <button class="nav-item" id="nav-new-goal">
+                        <span class="nav-item-icon">⊕</span> Nueva meta
+                    </button>
+                    <button class="nav-item" id="nav-new-category">
+                        <span class="nav-item-icon">◫</span> Nueva categoría
+                    </button>
+                    <button class="nav-item" id="btn-sync">
+                        <span class="nav-item-icon">⟳</span> Sincronizar Gmail
+                    </button>
+                </nav>
+
+                <!-- Usuario + logout -->
+                <div class="sidebar-user">
+                    <div class="user-card">
+                        <div class="user-avatar nova-grad" id="user-avatar">
+                            ?
+                        </div>
+                        <div style="overflow: hidden; flex: 1; min-width: 0">
+                            <div
+                                style="
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                    color: var(--text);
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                "
+                                id="user-name">
+                                —
+                            </div>
+                            <div
+                                style="
+                                    font-size: 12px;
+                                    color: var(--text2);
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                "
+                                id="user-email">
+                                —
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        id="btn-logout"
+                        class="btn btn-ghost"
+                        style="width: 100%; margin-top: 8px; font-size: 12px">
+                        Cerrar sesión
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Overlay móvil del sidebar -->
+            <div id="sidebar-overlay"></div>
+
+            <!-- ── Header ─────────────────────────────────────────────────────────── -->
+            <header
+                style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 20px;
+                    height: 64px;
+                    background: var(--bg2);
+                    border-bottom: 1px solid var(--border);
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                ">
+                <div style="display: flex; align-items: center; gap: 12px">
+                    <!-- Botón menú hamburguesa (solo móvil) -->
+                    <button
+                        id="btn-menu"
+                        class="btn btn-secondary btn-sm"
+                        style="
+                            display: none;
+                            width: 40px;
+                            height: 40px;
+                            padding: 0;
+                        ">
+                        ☰
+                    </button>
+                    <div style="font-size: 16px; font-weight: 700">
+                        Hola,
+                        <span class="gradient-text" id="greeting-name">—</span>
+                        👋
+                    </div>
+                </div>
+                <a href="./ai.html" class="btn btn-secondary btn-sm"
+                    >✦ Hablar con POCKETPAL</a
+                >
+            </header>
+
+            <!-- ── Main ──────────────────────────────────────────────────────────── -->
+            <main
+                style="
+                    background: var(--bg);
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    padding: 24px 28px;
+                ">
+                <!-- KPI cards -->
+                <div class="stat-cards-grid page-section">
+                    <div class="stat-card income">
+                        <span class="stat-icon" style="color: var(--green)"
+                            >↑</span
+                        >
+                        <div class="stat-label">Ingresos totales</div>
+                        <div
+                            class="stat-value"
+                            id="stat-income"
+                            style="color: var(--green)">
+                            —
+                        </div>
+                        <div class="stat-sub">Este período</div>
+                    </div>
+                    <div class="stat-card expense">
+                        <span class="stat-icon" style="color: var(--red)"
+                            >↓</span
+                        >
+                        <div class="stat-label">Gastos totales</div>
+                        <div
+                            class="stat-value"
+                            id="stat-expense"
+                            style="color: var(--red)">
+                            —
+                        </div>
+                        <div class="stat-sub">Este período</div>
+                    </div>
+                    <div class="stat-card balance">
+                        <span class="stat-icon" style="color: var(--blue)"
+                            >≈</span
+                        >
+                        <div class="stat-label">Balance neto</div>
+                        <div
+                            class="stat-value"
+                            id="stat-balance"
+                            style="color: var(--blue)">
+                            —
+                        </div>
+                        <div class="stat-sub">Ingreso − Gastos</div>
+                    </div>
+                    <div class="stat-card goals">
+                        <span class="stat-icon" style="color: var(--gold)"
+                            >◎</span
+                        >
+                        <div class="stat-label">Metas activas</div>
+                        <div
+                            class="stat-value"
+                            id="stat-goals"
+                            style="color: var(--gold)">
+                            —
+                        </div>
+                        <div class="stat-sub">En progreso</div>
+                    </div>
+                </div>
+
+                <!-- Gráficas -->
+                <div id="section-charts" class="charts-grid page-section">
+                    <div class="chart-card">
+                        <div class="chart-title">Ingresos vs. Gastos</div>
+                        <div class="chart-subtitle">Por mes</div>
+                        <div class="chart-container">
+                            <canvas id="chart-monthly"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Gastos por categoría</div>
+                        <div class="chart-subtitle">Distribución</div>
+                        <div class="chart-container">
+                            <canvas id="chart-categories"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balance acumulado -->
+                <div
+                    class="chart-card page-section"
+                    style="margin-bottom: 24px">
+                    <div class="chart-title">Balance acumulado</div>
+                    <div class="chart-subtitle">Evolución mes a mes</div>
+                    <div class="chart-container-sm">
+                        <canvas id="chart-balance"></canvas>
+                    </div>
+                </div>
+
+                <!-- Transacciones + Metas -->
+                <div class="tx-goals-grid page-section">
+                    <!-- Transacciones -->
+                    <div id="section-transactions" class="section-card">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Transacciones</div>
+                                <div class="section-subtitle" id="tx-subtitle">
+                                    —
+                                </div>
+                            </div>
+                            <button
+                                class="btn btn-primary btn-sm"
+                                id="btn-new-tx"
+                                style="width: auto">
+                                + Nueva
+                            </button>
+                        </div>
+
+                        <!-- Filtros -->
+                        <div class="filters-row">
+                            <select id="filter-type">
+                                <option value="">Todos los tipos</option>
+                                <option value="income">Ingresos</option>
+                                <option value="expense">Gastos</option>
+                            </select>
+                            <select id="filter-category">
+                                <option value="">Todas las categorías</option>
+                            </select>
+                            <input type="date" id="filter-start" />
+                            <input type="date" id="filter-end" />
+                            <button
+                                class="btn btn-ghost btn-sm"
+                                id="btn-clear-filters">
+                                ✕ Limpiar
+                            </button>
+                        </div>
+
+                        <!-- Tabla -->
+                        <div style="overflow-x: auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Monto</th>
+                                        <th>Categoría</th>
+                                        <th>Descripción</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tx-tbody">
+                                    <tr>
+                                        <td colspan="6">
+                                            <div
+                                                class="skeleton"
+                                                style="height: 40px"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginación -->
+                        <div id="pagination-controls"></div>
+                    </div>
+
+                    <!-- Metas -->
+                    <div id="section-goals" class="section-card">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Metas de ahorro</div>
+                                <div class="section-subtitle">
+                                    Activas e historial
+                                </div>
+                            </div>
+                            <button
+                                class="btn btn-secondary btn-sm"
+                                id="btn-new-goal">
+                                + Meta
+                            </button>
+                        </div>
+                        <div id="goals-list">
+                            <div
+                                class="skeleton"
+                                style="height: 80px; border-radius: 12px"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categorías personalizadas -->
+                <div
+                    id="section-categories"
+                    class="section-card page-section"
+                    style="margin-bottom: 24px">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">
+                                Mis categorías personalizadas
+                            </div>
+                            <div class="section-subtitle">
+                                Las categorías globales del sistema son de solo
+                                lectura
+                            </div>
+                        </div>
+                        <button
+                            class="btn btn-secondary btn-sm"
+                            id="btn-new-category">
+                            + Nueva categoría
+                        </button>
+                    </div>
+                    <div
+                        id="categories-list"
+                        style="display: flex; flex-wrap: wrap; gap: 8px">
+                        <div
+                            class="skeleton"
+                            style="
+                                height: 36px;
+                                width: 160px;
+                                border-radius: 99px;
+                            "></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <!-- /app-shell -->
+
+        <!-- ════════ MODALES ════════════════════════════════════════════════════════ -->
+
+        <!-- Crear / Editar transacción -->
+        <div class="modal-overlay" id="modal-tx">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-tx-title">
+                        Nueva transacción
+                    </h2>
+                    <button class="modal-close" data-close="modal-tx">×</button>
+                </div>
+                <form id="form-tx" novalidate>
+                    <input type="hidden" id="tx-id" />
+                    <div class="form-group">
+                        <label class="form-label">Tipo</label>
+                        <input type="hidden" id="tx-type" value="expense" />
+                        <div class="type-toggle">
+                            <button
+                                type="button"
+                                class="type-btn income"
+                                id="type-income"
+                                data-type="income">
+                                ↑ Ingreso
+                            </button>
+                            <button
+                                type="button"
+                                class="type-btn expense active"
+                                id="type-expense"
+                                data-type="expense">
+                                ↓ Gasto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tx-amount"
+                                >Monto</label
+                            >
+                            <input
+                                type="number"
+                                id="tx-amount"
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0.01"
+                                required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="tx-date"
+                                >Fecha</label
+                            >
+                            <input type="date" id="tx-date" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tx-category"
+                            >Categoría</label
+                        >
+                        <select id="tx-category" required>
+                            <option value="">Selecciona categoría</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tx-description"
+                            >Descripción (opcional)</label
+                        >
+                        <input
+                            type="text"
+                            id="tx-description"
+                            placeholder="Ej: Almuerzo en el trabajo"
+                            maxlength="500" />
+                    </div>
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-close="modal-tx">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="submit-tx-btn"
+                            style="width: auto">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Confirmar eliminación de transacción -->
+        <div class="modal-overlay" id="modal-delete-tx">
+            <div class="modal" style="max-width: 400px">
+                <div class="modal-header">
+                    <h2 class="modal-title">¿Eliminar transacción?</h2>
+                    <button class="modal-close" data-close="modal-delete-tx">
+                        ×
+                    </button>
+                </div>
+                <p
+                    style="
+                        color: var(--text2);
+                        font-size: 14px;
+                        margin-bottom: 6px;
+                    ">
+                    Esta acción
+                    <strong style="color: var(--text)"
+                        >no se puede deshacer</strong
+                    >.
+                </p>
+                <p
+                    style="
+                        color: var(--text3);
+                        font-size: 13px;
+                        margin-bottom: 24px;
+                    "
+                    id="delete-tx-info"></p>
+                <div class="form-actions">
+                    <button
+                        class="btn btn-secondary"
+                        data-close="modal-delete-tx">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger" id="confirm-delete-tx-btn">
+                        Sí, eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crear / Editar meta -->
+        <div class="modal-overlay" id="modal-goal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-goal-title">
+                        Nueva meta de ahorro
+                    </h2>
+                    <button class="modal-close" data-close="modal-goal">
+                        ×
+                    </button>
+                </div>
+                <form id="form-goal" novalidate>
+                    <input type="hidden" id="goal-id" />
+                    <div class="form-group">
+                        <label class="form-label" for="goal-title-input"
+                            >Nombre de la meta</label
+                        >
+                        <input
+                            type="text"
+                            id="goal-title-input"
+                            placeholder="Ej: Viaje a Europa"
+                            required
+                            maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="goal-amount"
+                            >Monto objetivo</label
+                        >
+                        <input
+                            type="number"
+                            id="goal-amount"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="1"
+                            required />
+                        <p class="form-hint" id="goal-amount-hint" hidden></p>
+                    </div>
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-close="modal-goal">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="submit-goal-btn"
+                            style="width: auto">
+                            Crear meta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Abonar a meta -->
+        <div class="modal-overlay" id="modal-allocate">
+            <div class="modal" style="max-width: 380px">
+                <div class="modal-header">
+                    <h2 class="modal-title">Abonar a meta</h2>
+                    <button class="modal-close" data-close="modal-allocate">
+                        ×
+                    </button>
+                </div>
+                <p
+                    style="
+                        color: var(--text2);
+                        font-size: 14px;
+                        margin-bottom: 4px;
+                    ">
+                    Meta:
+                    <strong
+                        id="allocate-goal-name"
+                        style="color: var(--text)"></strong>
+                </p>
+                <p
+                    style="
+                        color: var(--text3);
+                        font-size: 12px;
+                        margin-bottom: 20px;
+                    "
+                    id="allocate-goal-progress"></p>
+                <form id="form-allocate" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="allocate-amount"
+                            >Monto a abonar</label
+                        >
+                        <input
+                            type="number"
+                            id="allocate-amount"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0.01"
+                            required />
+                    </div>
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-close="modal-allocate">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="allocate-btn"
+                            style="width: auto">
+                            Abonar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Confirmar eliminación de meta -->
+        <div class="modal-overlay" id="modal-delete-goal">
+            <div class="modal" style="max-width: 440px">
+                <div class="modal-header">
+                    <h2 class="modal-title">¿Eliminar esta meta?</h2>
+                    <button class="modal-close" data-close="modal-delete-goal">
+                        ×
+                    </button>
+                </div>
+                <p
+                    style="
+                        color: var(--text2);
+                        font-size: 14px;
+                        margin-bottom: 16px;
+                    "
+                    id="delete-goal-info"></p>
+                <!-- Explicación del impacto financiero — importante para que el usuario entienda qué ocurre con su dinero -->
+                <div class="danger-box">
+                    ⚠️ Los
+                    <strong style="color: var(--text)"
+                        >aportes ya realizados</strong
+                    >
+                    (registrados como transacciones de tipo «Ahorro»)
+                    <strong style="color: var(--text)"
+                        >permanecerán en tu historial</strong
+                    >
+                    y seguirán descontándose del balance. Solo se elimina la
+                    meta y su seguimiento de progreso.
+                </div>
+                <div class="form-actions">
+                    <button
+                        class="btn btn-secondary"
+                        data-close="modal-delete-goal">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger" id="confirm-delete-goal-btn">
+                        Sí, eliminar meta
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crear / Editar categoría -->
+        <div class="modal-overlay" id="modal-category">
+            <div class="modal" style="max-width: 400px">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-category-title">
+                        Nueva categoría
+                    </h2>
+                    <button class="modal-close" data-close="modal-category">
+                        ×
+                    </button>
+                </div>
+                <form id="form-category" novalidate>
+                    <input type="hidden" id="category-id" />
+                    <div class="form-group">
+                        <label class="form-label" for="category-name"
+                            >Nombre</label
+                        >
+                        <input
+                            type="text"
+                            id="category-name"
+                            placeholder="Ej: Mascotas"
+                            required
+                            maxlength="100" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="category-type"
+                            >Tipo</label
+                        >
+                        <select id="category-type" required>
+                            <option value="expense">Gasto</option>
+                            <option value="income">Ingreso</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-close="modal-category">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="submit-category-btn"
+                            style="width: auto">
+                            Crear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Confirmar eliminación de categoría -->
+        <div class="modal-overlay" id="modal-delete-category">
+            <div class="modal" style="max-width: 400px">
+                <div class="modal-header">
+                    <h2 class="modal-title">¿Eliminar categoría?</h2>
+                    <button
+                        class="modal-close"
+                        data-close="modal-delete-category">
+                        ×
+                    </button>
+                </div>
+                <p
+                    style="
+                        color: var(--text2);
+                        font-size: 14px;
+                        margin-bottom: 24px;
+                    "
+                    id="delete-category-info"></p>
+                <div class="form-actions">
+                    <button
+                        class="btn btn-secondary"
+                        data-close="modal-delete-category">
+                        Cancelar
+                    </button>
+                    <button
+                        class="btn btn-danger"
+                        id="confirm-delete-category-btn">
+                        Sí, eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast container -->
+        <div id="toast-container"></div>
+
+        <!-- ════════ SCRIPTS ════════════════════════════════════════════════════════
+     Orden de carga obligatorio (cada script puede usar lo que cargó antes):
+       1. api.js               — cliente HTTP, auth, fmt, toast (globales)
+       2. modules/ui.js        — openModal, closeModal, setTxType, etc.
+       3. modules/charts.js    — renderCharts(summaryData)
+       4. modules/txModule.js  — CRUD transacciones + paginación
+       5. modules/goalsModule.js     — CRUD metas + aportes
+       6. modules/categoriesModule.js — CRUD categorías personalizadas
+       7. dashboard.js         — orquestador: loadAllData, renderStats, init
+       8. script.js            — sidebar móvil
+     ════════════════════════════════════════════════════════════════════════ -->
+        <script src="js/api.js"></script>
+        <script src="js/modules/ui.js"></script>
+        <script src="js/modules/charts.js"></script>
+        <script src="js/modules/txModule.js"></script>
+        <script src="js/modules/goalsModule.js"></script>
+        <script src="js/modules/categoriesModule.js"></script>
+        <script src="js/dashboard.js"></script>
+        <script src="js/script.js"></script>
+    </body>
+</html>

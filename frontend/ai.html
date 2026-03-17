@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PocketPal — Agente POCKETPAL</title>
+
+        <!-- Fuentes -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet" />
+
+        <!-- Estilos: base → componentes → página -->
+        <link rel="stylesheet" href="css/base.css" />
+        <link rel="stylesheet" href="css/components.css" />
+        <link rel="stylesheet" href="css/ai.css" />
+    </head>
+
+    <body>
+        <div class="ai-shell">
+            <!-- ── Header ─────────────────────────────────────────────────────────── -->
+            <header class="ai-header">
+                <span
+                    class="gradient-text"
+                    style="
+                        font-size: 18px;
+                        font-weight: 700;
+                        letter-spacing: -0.01em;
+                    ">
+                    Agente POCKETPAL
+                </span>
+                <a href="./dashboard.html" class="btn btn-secondary btn-sm"
+                    >← Dashboard</a
+                >
+            </header>
+
+            <!-- ── Área del chat ──────────────────────────────────────────────────── -->
+            <main class="ai-main">
+                <div class="ai-content">
+                    <!-- Cabecera del agente -->
+                    <div class="agent-header">
+                        <div class="agent-avatar">✦</div>
+                        <div>
+                            <div class="agent-name gradient-text">
+                                POCKETPAL
+                            </div>
+                            <div class="agent-status">
+                                <span class="status-dot"></span>
+                                En línea · Asistente financiero IA
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensajes -->
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Burbuja de bienvenida — renderizada estáticamente en el HTML,
+             el resto de burbujas se añaden dinámicamente desde ai.js -->
+                        <div class="chat-bubble assistant">
+                            <div class="bubble-body assistant">
+                                ¡Hola! Soy
+                                <strong style="color: var(--purple)"
+                                    >POKI</strong
+                                >, tu asistente financiero personal. 🤖
+                                <br /><br />
+                                Puedo ayudarte a:
+                                <ul
+                                    style="
+                                        margin-top: 8px;
+                                        margin-left: 16px;
+                                        color: var(--text2);
+                                    ">
+                                    <li>
+                                        Registrar ingresos y gastos con solo
+                                        describirlos
+                                    </li>
+                                    <li>
+                                        Consultar tus estadísticas del mes,
+                                        semana o año
+                                    </li>
+                                    <li>Ver tus últimas transacciones</li>
+                                    <li>
+                                        Revisar el progreso de tus metas de
+                                        ahorro
+                                    </li>
+                                    <li>
+                                        Darte consejos basados en tus finanzas
+                                        reales
+                                    </li>
+                                </ul>
+                                <br />¿Con qué empezamos?
+                                <span
+                                    class="bubble-time"
+                                    id="welcome-time"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Área de input -->
+                    <div class="input-area">
+                        <!-- Acciones rápidas (los textos los maneja ai.js via data-prompt) -->
+                        <div class="quick-actions" id="quick-actions">
+                            <button
+                                class="quick-btn"
+                                data-prompt="¿Cuánto gasté este mes?">
+                                📊 Gasto del mes
+                            </button>
+                            <button
+                                class="quick-btn"
+                                data-prompt="Muéstrame mis últimas transacciones">
+                                📋 Últimas transacciones
+                            </button>
+                            <button
+                                class="quick-btn"
+                                data-prompt="¿Cómo van mis metas de ahorro?">
+                                🎯 Mis metas
+                            </button>
+                            <button
+                                class="quick-btn"
+                                data-prompt="Dame un resumen de mis finanzas de este año">
+                                📈 Resumen anual
+                            </button>
+                            <button
+                                class="quick-btn"
+                                data-prompt="Gasté 50000 en alimentación hoy">
+                                + Registrar gasto
+                            </button>
+                        </div>
+
+                        <!-- Textarea + botón enviar -->
+                        <div class="input-row">
+                            <textarea
+                                id="chat-input"
+                                class="chat-input"
+                                rows="1"
+                                placeholder='Escribe un mensaje… ej: "Gasté $80.000 en el supermercado"'></textarea>
+                            <button
+                                id="send-btn"
+                                class="send-btn"
+                                type="button"
+                                title="Enviar mensaje">
+                                ↑
+                            </button>
+                        </div>
+
+                        <p class="input-hint">
+                            NOVA usa inteligencia artificial para entender tu
+                            lenguaje natural
+                        </p>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Toast container -->
+        <div id="toast-container"></div>
+
+        <!-- Scripts: api.js primero (auth, ai, toast), luego lógica del chat -->
+        <script src="js/api.js"></script>
+        <script src="js/pages/ai.js"></script>
+    </body>
+</html>
