@@ -26,7 +26,7 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
 
 /** URL base de la API. Cambiar en producción. */
-const API_BASE = process.env.API_URL;
+const API_BASE = window.API_URL || 'https://pocketpal-api.railway.app';
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
