@@ -26,7 +26,7 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
 
 /** URL base de la API. Cambiar en producción. */
-const API_BASE = "/api";
+const API_BASE = process.env.API_URL;
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
